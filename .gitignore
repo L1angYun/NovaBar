@@ -1,0 +1,53 @@
+# ---- .NET / Visual Studio ----
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+*.nuget.props
+*.nuget.targets
+
+# ---- C++ / MSBuild ----
+x64/
+ARM64/
+Debug/
+Release/
+*.vcxproj.user
+*.aps
+*.ipch
+.ipch
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.tlog
+Generated Files/
+ipch/
+packages/
+*.appx
+*.appxupload
+*.msix
+*.msixupload
+*.binlog
+
+# ---- 构建产物 ----
+artifacts/
+out/
+dist/
+
+# ---- 本地环境 ----
+.env
+.env.local
+*.local.json
+.vscode/settings.json.local
+
+# ---- 系统 ----
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

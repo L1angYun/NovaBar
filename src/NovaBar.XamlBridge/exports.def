@@ -1,0 +1,4 @@
+; NovaBar.XamlBridge 导出
+EXPORTS
+    DllGetClassObject PRIVATE
+    NovaBarHookProc

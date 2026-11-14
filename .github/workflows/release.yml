@@ -1,0 +1,59 @@
+name: Installer release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Check release version
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content .\src\NovaBar.App\NovaBar.App.csproj
+          $version = [string]$project.Project.PropertyGroup.Version
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid project release version.' }
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -cne "v$version") { throw 'Tag must match the application version.' }
+          "NOVABAR_VERSION=$version" >> $env:GITHUB_ENV
+          "version=$version" >> $env:GITHUB_OUTPUT
+      - name: Install pinned compiler in runner temporary directory
+        shell: pwsh
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP 'innosetup-7.1.0-x64.exe'
+          $compilerDirectory = Join-Path $env:RUNNER_TEMP 'inno-7.1.0'
+          Invoke-WebRequest -Uri 'https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe' -OutFile $installer -TimeoutSec 120
+          $expectedHash = '0362a383ed217d4c4239b5933866dd96d3eb2102737da92f80f6057a4b40df2f'
+          if ((Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash -ine $expectedHash) { throw 'Pinned compiler SHA256 mismatch.' }
+          $process = Start-Process -FilePath $installer -WindowStyle Hidden -PassThru -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-','/CURRENTUSER','/PORTABLE=1',"/DIR=`"$compilerDirectory`"")
+          if (-not $process.WaitForExit(120000)) { $process.Kill(); throw 'Compiler extraction timed out.' }
+          if ($process.ExitCode -ne 0) { throw 'Compiler extraction failed.' }
+          "NOVABAR_ISCC=$compilerDirectory\ISCC.exe" >> $env:GITHUB_ENV
+      - name: Test application and native components
+        shell: pwsh
+        run: .\build\test.ps1
+      - name: Test installer metadata and synthetic lifecycle
+        shell: pwsh
+        run: |
+          .\installer\tests\ReleaseAssets.Tests.ps1
+          .\installer\tests\InstallerLifecycle.Tests.ps1 -CompilerPath $env:NOVABAR_ISCC
+      - name: Build self-contained installer and update manifest
+        shell: pwsh
+        run: .\build\installer.ps1 -CompilerPath $env:NOVABAR_ISCC -Version $env:NOVABAR_VERSION
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NovaBar-installer
+          if-no-files-found: error
+          path: |
+            dist/installer/NovaBar-${{ steps.version.outputs.version }}-win-x64-Setup.exe
+            dist/installer/update.json
+            dist/installer/SHA256SUMS.txt

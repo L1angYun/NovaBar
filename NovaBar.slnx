@@ -1,0 +1,12 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/NovaBar.App/NovaBar.App.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/NovaBar.Core/NovaBar.Core.csproj" />
+    <Project Path="src/NovaBar.Tray/NovaBar.Tray.csproj" />
+  </Folder>
+</Solution>

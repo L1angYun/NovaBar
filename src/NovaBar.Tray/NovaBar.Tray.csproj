@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    托盘图标单独放一个类库工程。
+    直接在 WinUI 工程里开 UseWindowsForms 会让 Microsoft.WinFX.targets 把项目里的
+    .xaml 当 WPF 编译（MC6000），所以这块必须隔离。这个库没有 XAML，只依赖 WinForms。
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>NovaBar.Tray</RootNamespace>
+    <AssemblyName>NovaBar.Tray</AssemblyName>
+  </PropertyGroup>
+</Project>

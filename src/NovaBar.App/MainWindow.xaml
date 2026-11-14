@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="NovaBar.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶部状态条 -->
+        <Grid x:Name="TitleStrip" Height="48" Padding="16,0" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="NovaBar" FontFamily="MiSans" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBlock x:Name="SubtitleText" Grid.Column="1" FontFamily="MiSans" Text="液态玻璃 · 任务栏 / 开始菜单 / 通知中心"
+                       Margin="12,0,0,0" Opacity="0.65" FontSize="12" VerticalAlignment="Center" />
+            <Border Grid.Column="2" CornerRadius="12" Padding="10,4" VerticalAlignment="Center"
+                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}">
+                <StackPanel Spacing="0">
+                    <TextBlock x:Name="EngineStatusText" Text="引擎：未连接" FontFamily="MiSans" FontSize="12" />
+                    <TextBlock x:Name="CaptureStatusText" Text="捕获：未连接" FontFamily="MiSans" FontSize="11" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <InfoBar x:Name="StartupUpdateNotice" Grid.Row="1" Margin="16,8,16,0"
+                 IsOpen="False" Severity="Informational">
+            <InfoBar.ActionButton>
+                <Button Content="查看更新" Click="OnReviewStartupUpdate" />
+            </InfoBar.ActionButton>
+        </InfoBar>
+
+        <NavigationView x:Name="Nav" Grid.Row="2"
+                        PaneDisplayMode="Left"
+                        FontFamily="MiSans"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        SelectionChanged="OnNavSelectionChanged">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="外观" Tag="appearance" IsSelected="True">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE790;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="界面" Tag="surfaces">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE71D;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="规则" Tag="rules">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE71C;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="AboutNavItem" Content="关于" Tag="about">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE946;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <ScrollViewer Padding="24,16,24,24"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <!-- ================= 外观 ================= -->
+                    <StackPanel x:Name="PageAppearance" Spacing="16">
+                        <TextBlock Text="外观" Style="{StaticResource TitleTextBlockStyle}" />
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="SurfaceBox" Header="界面" HorizontalAlignment="Stretch"
+                                      SelectionChanged="OnSurfaceChanged" />
+                            <ComboBox x:Name="StateBox" Grid.Column="1" Header="状态" HorizontalAlignment="Stretch"
+                                      SelectionChanged="OnStateChanged" />
+                        </Grid>
+
+                        <TextBlock x:Name="EditorContextText" TextWrapping="Wrap" Opacity="0.7" />
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <ToggleSwitch x:Name="StateEnabledToggle" Header="启用此状态" Toggled="OnStateEnabledToggled" />
+                            <ComboBox x:Name="AppearanceRoleBox" Header="编辑外观" SelectedIndex="0" SelectionChanged="OnAppearanceRoleChanged">
+                                <ComboBoxItem Content="活动窗口" />
+                                <ComboBoxItem Content="非活动窗口" />
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <ToggleSwitch x:Name="InactiveToggle" Header="单独设置非活动外观" Toggled="OnInactiveToggled" />
+                            <Button x:Name="ReturnToStateButton" Content="返回状态外观" Click="OnReturnToStateClick" VerticalAlignment="Bottom" Visibility="Collapsed" />
+                        </StackPanel>
+
+                        <ContentControl x:Name="AppearanceEditor" HorizontalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <ComboBox x:Name="AccentBox" Header="材质" SelectionChanged="OnAccentChanged" Width="220">
+                                <ComboBoxItem Content="系统默认 / Normal" />
+                                <ComboBoxItem Content="不透明 / Opaque" />
+                                <ComboBoxItem Content="全透明 / Clear" />
+                                <ComboBoxItem Content="模糊 / Blur" />
+                                <ComboBoxItem Content="亚克力 / Acrylic" />
+                                <ComboBoxItem Content="液态玻璃 / LiquidGlass" />
+                            </ComboBox>
+                            <ToggleSwitch x:Name="ShowLineToggle" Header="显示任务栏线条" Toggled="OnAppearanceToggleChanged" />
+                            <ToggleSwitch x:Name="ShowPeekToggle" Header="显示桌面预览按钮" Toggled="OnAppearanceToggleChanged" />
+                        </StackPanel>
+                        <TextBlock x:Name="CapabilityText" TextWrapping="Wrap" FontSize="12" Opacity="0.65" />
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="预设" FontWeight="SemiBold" />
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <StackPanel x:Name="PresetHost" Orientation="Horizontal" Spacing="8" />
+                            </ScrollViewer>
+                        </StackPanel>
+
+                        <Grid ColumnSpacing="16" RowSpacing="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Slider x:Name="SldBlur" Header="模糊半径" Minimum="0" Maximum="750" StepFrequency="1"
+                                    ValueChanged="OnSliderChanged" />
+                            <Slider x:Name="SldRefraction" Grid.Column="1" Header="折射" Minimum="0" Maximum="1"
+                                    StepFrequency="0.01" ValueChanged="OnSliderChanged" />
+                            <Slider x:Name="SldSpecular" Grid.Row="1" Header="高光" Minimum="0" Maximum="1"
+                                    StepFrequency="0.01" ValueChanged="OnSliderChanged" />
+                            <Slider x:Name="SldDispersion" Grid.Row="1" Grid.Column="1" Header="边缘色散" Minimum="0"
+                                    Maximum="1" StepFrequency="0.01" ValueChanged="OnSliderChanged" />
+                            <Slider x:Name="SldNoise" Grid.Row="2" Header="噪声" Minimum="0" Maximum="1"
+                                    StepFrequency="0.01" ValueChanged="OnSliderChanged" />
+                            <Slider x:Name="SldTint" Grid.Row="2" Grid.Column="1" Header="色调浓度" Minimum="0" Maximum="1"
+                                    StepFrequency="0.01" ValueChanged="OnSliderChanged" />
+                        </Grid>
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="ColorBox" Header="颜色（#AARRGGBB）" Text="#00000000"
+                                     TextChanged="OnColorChanged" />
+                            <TextBlock Grid.Column="1" VerticalAlignment="Bottom" Margin="0,0,0,8" FontSize="12"
+                                       Opacity="0.6"
+                                       Text="纯色使用 RGB；亚克力与液态玻璃使用 A 调节色调浓度。系统默认和全透明无需设置颜色。" />
+                        </Grid>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="预览" FontWeight="SemiBold" />
+                            <Border Height="176" CornerRadius="8">
+                                <Grid>
+                                    <Grid.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#FF152238" Offset="0" />
+                                            <GradientStop Color="#FF6B2D5C" Offset="0.45" />
+                                            <GradientStop Color="#FF1F4B3F" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Grid.Background>
+
+                                    <Border x:Name="PreviewCard" Margin="18" CornerRadius="14">
+                                        <Grid>
+                                            <Border x:Name="PreviewHighlight" CornerRadius="14" />
+                                            <Border x:Name="PreviewRim" CornerRadius="14" BorderThickness="1" />
+                                            <StackPanel Margin="18" VerticalAlignment="Center" Spacing="4">
+                                                <TextBlock Text="液态玻璃预览" FontWeight="SemiBold" Foreground="White" />
+                                                <TextBlock Text="参数与左侧滑块实时联动" FontSize="12"
+                                                           Foreground="#CCFFFFFF" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <TextBlock FontSize="11" Opacity="0.55"
+                                       Text="预览仅模拟色调、高光和边缘；实际效果使用所选界面背后的真实画面。圆角由系统管理。" />
+                        </StackPanel>
+                        </StackPanel>
+
+                        </ContentControl>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="ApplyButton" Content="应用到系统" Style="{StaticResource AccentButtonStyle}"
+                                    Click="OnApplyClick" />
+                            <Button Content="保存配置" Click="OnSaveClick" />
+                            <Button Content="导入 JSON" Click="OnImportJsonClick" />
+                            <Button Content="导出 JSON" Click="OnExportClick" />
+                            <Button Content="导入 TTB" Click="OnImportClick" />
+                        </StackPanel>
+                        <TextBlock x:Name="SaveStatusText" TextWrapping="Wrap" FontSize="12" Opacity="0.7" />
+                    </StackPanel>
+
+                    <!-- ================= 界面 ================= -->
+                    <StackPanel x:Name="PageSurfaces" Spacing="16" Visibility="Collapsed">
+                        <TextBlock Text="界面" Style="{StaticResource TitleTextBlockStyle}" />
+                        <TextBlock Opacity="0.7" TextWrapping="Wrap"
+                                   Text="每个界面独立开关、独立保存外观、液态玻璃参数和规则。开始菜单、通知 / 快速设置默认关闭；开启后可单独设置模糊、折射、高光、色散、噪声与色调。" />
+                        <StackPanel x:Name="SurfaceToggleHost" Spacing="4" />
+                    </StackPanel>
+
+                    <!-- ================= 规则 ================= -->
+                    <StackPanel x:Name="PageRules" Spacing="16" Visibility="Collapsed">
+                        <TextBlock Text="规则" Style="{StaticResource TitleTextBlockStyle}" />
+                        <TextBlock x:Name="RuleSurfaceText" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Opacity="0.7" TextWrapping="Wrap"
+                                   Text="先匹配当前窗口状态的专用规则，再匹配通用规则。每组按进程名、窗口标题、窗口类名匹配；包含匹配，不区分大小写。" />
+                        <ComboBox x:Name="RuleScopeBox" Header="规则范围" SelectedIndex="0" Width="220" HorizontalAlignment="Left" SelectionChanged="OnRuleScopeChanged">
+                            <ComboBoxItem Content="通用" />
+                            <ComboBoxItem Content="有窗口" />
+                            <ComboBoxItem Content="最大化" />
+                        </ComboBox>
+
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="RuleKindBox" Width="140" SelectedIndex="0">
+                                <ComboBoxItem Content="进程名" />
+                                <ComboBoxItem Content="窗口标题" />
+                                <ComboBoxItem Content="窗口类名" />
+                            </ComboBox>
+                            <TextBox x:Name="RulePatternBox" Grid.Column="1" PlaceholderText="例如 chrome.exe" />
+                            <Button Grid.Column="2" Content="添加（使用当前外观）" Click="OnAddRuleClick" />
+                        </Grid>
+
+                        <ListView x:Name="RuleList" Height="200" SelectionMode="Single" SelectionChanged="OnRuleSelectionChanged" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="删除所选规则" Click="OnRemoveRuleClick" />
+                            <Button Content="更新匹配条件" Click="OnUpdateRuleClick" />
+                            <Button Content="编辑所选外观" Click="OnEditRuleClick" />
+                            <TextBlock x:Name="RuleHint" VerticalAlignment="Center" Opacity="0.6" FontSize="12" />
+                        </StackPanel>
+                        <TextBlock Text="忽略窗口（界面共用）" FontWeight="SemiBold" />
+                        <TextBlock Text="命中的窗口不参与有窗口 / 最大化判断，回退到桌面外观。" FontSize="12" Opacity="0.7" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="140" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <ComboBox x:Name="IgnoreKindBox" SelectedIndex="0" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="进程名" /><ComboBoxItem Content="窗口标题" /><ComboBoxItem Content="窗口类名" />
+                            </ComboBox>
+                            <TextBox x:Name="IgnorePatternBox" Grid.Column="1" PlaceholderText="忽略的匹配串" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="添加" Click="OnAddIgnoredClick" />
+                            <Button Content="更新" Click="OnUpdateIgnoredClick" />
+                            <Button Content="删除" Click="OnRemoveIgnoredClick" />
+                        </StackPanel>
+                        <ListView x:Name="IgnoredList" Height="160" SelectionMode="Single" SelectionChanged="OnIgnoredSelectionChanged" />
+                    </StackPanel>
+
+                    <!-- ================= 关于 ================= -->
+                    <StackPanel x:Name="PageAbout" Spacing="12" Visibility="Collapsed">
+                        <TextBlock Text="关于" Style="{StaticResource TitleTextBlockStyle}" />
+                        <TextBlock x:Name="AboutVersionText" />
+                        <TextBlock x:Name="AboutPlatformText" Opacity="0.75" IsTextSelectionEnabled="True" />
+                        <TextBlock x:Name="AboutBackendText" Opacity="0.75" IsTextSelectionEnabled="True" />
+                        <TextBlock x:Name="AboutConfigPathText" Opacity="0.75" IsTextSelectionEnabled="True"
+                                   TextWrapping="Wrap" />
+
+                        <ComboBox x:Name="UpdateSourceBox" Header="更新来源" SelectionChanged="OnUpdateSourceChanged"
+                                  HorizontalAlignment="Left" MinWidth="220" Margin="0,8,0,0">
+                            <ComboBoxItem Content="自动（GitHub / Gitee）" />
+                            <ComboBoxItem Content="GitHub" />
+                            <ComboBoxItem Content="Gitee（国内镜像）" />
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="CheckUpdatesButton" Content="检查更新" Click="OnCheckUpdatesClick" />
+                            <Button x:Name="DownloadUpdateButton" Content="下载并更新" Click="OnDownloadUpdateClick" IsEnabled="False" />
+                            <Button x:Name="OpenReleaseButton" Content="发行说明" Click="OnOpenReleaseClick" IsEnabled="False" />
+                            <Button x:Name="CancelUpdateButton" Content="取消下载" Click="OnCancelUpdateClick" Visibility="Collapsed" />
+                        </StackPanel>
+                        <TextBlock x:Name="UpdateStatusText" Text="尚未检查更新。" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                        <ProgressBar x:Name="UpdateProgressBar" Minimum="0" Maximum="100" Visibility="Collapsed" />
+                        <Expander x:Name="ReleaseNotesExpander" Header="版本与更新内容" Visibility="Collapsed" HorizontalAlignment="Stretch">
+                            <ScrollViewer MaxHeight="200">
+                                <TextBlock x:Name="ReleaseNotesText" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                            </ScrollViewer>
+                        </Expander>
+                        <ToggleSwitch x:Name="CheckUpdatesOnStartupToggle" Header="启动配置中心时检查更新" Toggled="OnGlobalToggled" />
+
+                        <ToggleSwitch x:Name="StartupToggle" Header="开机自动启动引擎"
+                                      Toggled="OnStartupToggled" Margin="0,12,0,0" />
+                        <TextBlock FontSize="12" Opacity="0.6" TextWrapping="Wrap"
+                                   Text="只拉起引擎（后台应用外观），不会弹出配置中心。" />
+                        <ToggleSwitch x:Name="TrayToggle" Header="显示托盘图标" Toggled="OnGlobalToggled" />
+                        <ToggleSwitch x:Name="CloseToTrayToggle" Header="关闭窗口时保留在托盘" Toggled="OnGlobalToggled" />
+                        <ToggleSwitch x:Name="AutoApplyToggle" Header="修改后自动应用" Toggled="OnGlobalToggled" />
+                        <ToggleSwitch x:Name="DisableSavingToggle" Header="仅本次会话（停止保存配置）" Toggled="OnGlobalToggled" />
+                        <Button Content="退出配置中心" Click="OnExitClick" HorizontalAlignment="Left" />
+
+                        <TextBlock Opacity="0.6" TextWrapping="Wrap" Margin="0,8,0,0"
+                                   Text="NovaBar 以 GPL-3.0 发布。引擎部分衍生于 TranslucentTB（GPL-3.0）与其上游 styler 实现，详见仓库 NOTICE.md。" />
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </NavigationView>
+    </Grid>
+</Window>
